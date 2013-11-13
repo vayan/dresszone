@@ -3,5 +3,7 @@
     <string name="app_name">Smart Weather</string>
 
     <string name="textview">TextView</string>
+    
+    <color name="white">#FFFFFF</color>
 
 </resources>

@@ -1,12 +1,8 @@
 package com.sonyericsson.extras.liveware.extension.smartweather;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import android.location.Location;
-import android.location.LocationManager;
-import android.os.Bundle;
 import android.util.Log;
 import android.content.Context;
 
@@ -29,8 +25,18 @@ public class Weather {
 	
 	public void updateLoc() {
 	//TODO Use GPS
+		
+	//BEIJING	
 	lat = 39.9289;
 	lng = 116.3883;
+	
+	//PARIS
+//	lat = 48.856667;
+//	lng = 2.350987;
+	
+	//LYON
+//	lat = 45.767299;
+//	lng = 4.834329;
 	}
 	
 	public void updateData(SmartWeatherControl w) {
@@ -45,10 +51,12 @@ public class Weather {
 	public void DataUpdated(JSONObject data) throws JSONException {
 		Log.d(TAG, "update data called");
 		
+		String icon  = data.getJSONObject("currently").getString("icon");
 		String temp  = data.getJSONObject("currently").getString("temperature");
 		msg = data.getJSONObject("currently").getString("summary");
-		tempC = Double.valueOf(temp);
+		tempF = Double.valueOf(temp);
+		tempC = (double) Math.round((((tempF - 32) * 5/9)));
 		Log.d(TAG, "TEST string " + temp + "Test double "+ tempC);
-		wa.update_data(tempC, msg);
+		wa.update_data(tempC, msg, icon);
 	}
 }
