@@ -2,22 +2,27 @@ package com.sonyericsson.extras.liveware.extension.smartweather;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.location.Location;
+import android.os.Bundle;
 import android.os.Handler;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
 import android.view.ViewGroup.LayoutParams;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.sonyericsson.extras.liveware.aef.control.Control;
 import com.sonyericsson.extras.liveware.extension.util.control.ControlExtension;
 import com.sonyericsson.extras.liveware.extension.util.control.ControlTouchEvent;
 
-public class SmartWeatherControl extends ControlExtension {
+public class SmartWeatherControl extends ControlExtension  {
 	
 	private Handler mHandler = null;
+	private Context mcontext = null;
 	private int mWidth;
 	private int mHeight;
-    private static final Bitmap.Config BITMAP_CONFIG = Bitmap.Config.RGB_565;
 
 
 	public SmartWeatherControl(final String hostAppPackageName, final Context context,
@@ -29,6 +34,7 @@ public class SmartWeatherControl extends ControlExtension {
 		  	mHandler = handler;
 	        mWidth = getSupportedControlWidth(context);
 	        mHeight = getSupportedControlHeight(context);
+	        mcontext = context;
 	}
 
 	 public static int getSupportedControlWidth(Context context) {
@@ -39,10 +45,14 @@ public class SmartWeatherControl extends ControlExtension {
 	        return context.getResources().getDimensionPixelSize(R.dimen.smart_watch_control_height);
 	 }
 	 
+	 public void update_data(Double temp, String msg){
+		 sendText(R.id.textTemp, "Tmp : " + Double.toString(temp));
+		 sendText(R.id.textHello, "MSG : " + msg);
+	 }
+	 
 	 @Override
 	public void onStart() {
 		 Log.d(SmartWeatherService.LOG_TAG, "onStart");
-		 HelloWorld("Hell");
 	}
 	 
 	 @Override
@@ -60,9 +70,12 @@ public class SmartWeatherControl extends ControlExtension {
 	 @Override
 	public void onTouch(ControlTouchEvent event) {
 		 Log.d(SmartWeatherService.LOG_TAG,"onTouch");
-		HelloWorld("touched");
-		Weather w = new Weather();
-		w.updateData();
+		Weather w = new Weather(mcontext);
+		 Log.d(SmartWeatherService.LOG_TAG,"up GPS");
+		 w.updateLoc();
+		 Log.d(SmartWeatherService.LOG_TAG,"up weather");
+		w.updateData(this);
+		
 	}
 	 
 	 @Override
@@ -79,29 +92,21 @@ public class SmartWeatherControl extends ControlExtension {
 	 
 	 @Override
 	public void onResume() {
-		 Log.d(SmartWeatherService.LOG_TAG,"onRemuse");
-		 HelloWorld("Hello");
-	}
-	 
-	 public void HelloWorld(String text) {
-		 LinearLayout root = new LinearLayout(mContext);
-	     root.setLayoutParams(new LayoutParams(mWidth, mHeight));
+		 Log.d(SmartWeatherService.LOG_TAG,"onResume");
+		 
+		 Bundle[] data = new Bundle[2];
+		 Bundle b1 = new Bundle();
+		 Bundle btemp = new Bundle();
+		 
+	     b1.putInt(Control.Intents.EXTRA_LAYOUT_REFERENCE, R.id.textHello);
+	     b1.putString(Control.Intents.EXTRA_TEXT, "1");
 	     
-	     LinearLayout sampleLayout = (LinearLayout)LinearLayout.inflate(mContext, R.layout.home,
-	                root);
-	        sampleLayout.measure(mWidth, mHeight);
-	        sampleLayout
-	                .layout(0, 0, sampleLayout.getMeasuredWidth(), sampleLayout.getMeasuredHeight());
-	        TextView t = new TextView(mContext);
-	        t=(TextView)sampleLayout.findViewById(R.id.textHello); 
-	        t.setText(text);
-	        Log.d(SmartWeatherService.LOG_TAG,"Text setted");
-	        Bitmap menu = Bitmap.createBitmap(mWidth, mHeight, BITMAP_CONFIG);
-	        // Set default density to avoid scaling.
-	        menu.setDensity(DisplayMetrics.DENSITY_DEFAULT);
-	        Canvas canvas = new Canvas(menu);
-	        sampleLayout.draw(canvas);
-	        showBitmap(menu);
-	 }
-	
+	     btemp.putInt(Control.Intents.EXTRA_LAYOUT_REFERENCE, R.id.textTemp);
+	     btemp.putString(Control.Intents.EXTRA_TEXT, "1");
+		 
+	     data[0] = b1;
+	     data[1] = btemp;
+	     
+		 showLayout(R.layout.home, data);
+	}
 }

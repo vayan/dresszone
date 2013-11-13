@@ -17,8 +17,8 @@ public class SmartWeatherService extends ExtensionService{
 	
 	@Override
 	public void onCreate() {
-		super.onCreate();
 		Dbg.d("SmartWeatherService: onCreate");
+		super.onCreate();
 	};
 
 	@Override

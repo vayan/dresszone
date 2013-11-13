@@ -18,7 +18,7 @@ import org.json.JSONObject;
 import android.os.AsyncTask;
 import android.util.Log;
 
-public class QueryAPI extends AsyncTask<String, Void, JSONArray>{
+public class QueryAPI extends AsyncTask<String, Void, JSONObject>{
 	private Exception exception; //todo check exception
 	private static String TAG = SmartWeatherService.LOG_TAG;
 	private Weather w; 
@@ -42,13 +42,14 @@ public class QueryAPI extends AsyncTask<String, Void, JSONArray>{
 	}
 	
 	@Override
-	protected JSONArray doInBackground(String... params) {
+	protected JSONObject doInBackground(String... params) {
 		String url = params[0];
 		String result = null;
         HttpClient httpclient = new DefaultHttpClient();
         HttpGet httpget = new HttpGet(url);
         HttpResponse response;
         JSONArray valArray = null;
+        JSONObject json = null;
         Log.d(TAG, "Start query API");
         try {
                 response = httpclient.execute(httpget);
@@ -72,21 +73,26 @@ public class QueryAPI extends AsyncTask<String, Void, JSONArray>{
 		}
         try{
         	 Log.d(TAG, "Done go json");
-            JSONObject json = new JSONObject(result);
+            json = new JSONObject(result);
             JSONArray nameArray = json.names();
             valArray = json.toJSONArray(nameArray);
-            for (int i = 0; i < valArray.length(); i++) {
-                    Log.i(TAG, "<jsonname" + i + ">\\n" + nameArray.getString(i)    + "\\n</jsonname" + i + ">\\n" + "<jsonvalue" + i + ">\\n" + valArray.getString(i) + "\\n</jsonvalue"   + i + ">");
-            }
+//            for (int i = 0; i < valArray.length(); i++) {
+//                    Log.i(TAG, "<jsonname" + i + ">\\n" + nameArray.getString(i)    + "\\n</jsonname" + i + ">\\n" + "<jsonvalue" + i + ">\\n" + valArray.getString(i) + "\\n</jsonvalue"   + i + ">");
+//            }
             Log.d(TAG, "Json done");
 	    }
 	    catch (JSONException e) {
 	            Log.e("JSON", "There was an error parsing the JSON", e);
 	    }
-		return valArray;
+		return json;
 	}
 	
-	protected void onPostExecute(JSONArray json) {
-       w.DataUpdated();
-    }
+	@Override
+	protected void onPostExecute(JSONObject result) {
+		try {
+			w.DataUpdated(result);
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
+	}
 }
